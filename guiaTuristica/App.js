@@ -14,6 +14,7 @@ import RouteOrderScreen from './RouteOrderScreen';
 import WelcomeScreen from './WelcomeScreen';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
+import ImagesScreen from './ImagesScreen';
 
 
 
@@ -35,6 +36,7 @@ export default function App() {
         <Stack.Screen name="WelcomeScreen" component={WelcomeScreen}  options={{ headerShown: false }}/>
         <Stack.Screen name="LoginScreen" component={LoginScreen}  options={{ headerShown: false }}/>
         <Stack.Screen name="RegisterScreen" component={RegisterScreen}  options={{ headerShown: false }}/>
+        <Stack.Screen name="ImagesScreen" component={ImagesScreen}  options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import HomeButton from './HomeButton';
-
 
 const BACKEND_URL = 'http://192.168.68.120:3000/api/usuaris';
 
@@ -53,9 +51,8 @@ export default function ProfileScreen() {
         throw new Error(errorData.error || 'Error en desar les dades');
       }
 
-      const updatedUser = await res.json();
-
       Alert.alert('Perfil desat', 'Les dades s\'han actualitzat correctament');
+      setEditingField(null);
     } catch (error) {
       Alert.alert('Error', error.message);
     }
@@ -78,10 +75,10 @@ export default function ProfileScreen() {
             <Text style={styles.value}>{profile[fieldKey]}</Text>
           )}
           {isEditable && (
-          <TouchableOpacity onPress={() => setEditingField(fieldKey)}>
-            <Ionicons name="pencil" size={20} color="#1D4576" />
-          </TouchableOpacity>
-        )}
+            <TouchableOpacity onPress={() => setEditingField(fieldKey)}>
+              <Ionicons name="pencil" size={20} color="#1D4576" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
@@ -89,7 +86,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <HomeButton userID= {userID} />
+      <HomeButton userID={userID} />
       <Text style={styles.title}>El meu perfil</Text>
 
       {renderField('Nom', 'nom')}
@@ -102,9 +99,16 @@ export default function ProfileScreen() {
 
       <TouchableOpacity
         style={styles.goalsButton}
-        onPress={() => navigation.navigate('GoalsScreen', userID)}
+        onPress={() => navigation.navigate('GoalsScreen', { userID })}
       >
         <Text style={styles.goalsButtonText}>Veure les meves fites</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.photosButton}
+        onPress={() => navigation.navigate('ImagesScreen', { userID })}
+      >
+        <Text style={styles.photosButtonText}>Veure les meves imatges</Text>
       </TouchableOpacity>
     </View>
   );
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
-    marginTop: 40,
+    marginTop: 30,
     alignItems: 'center',
   },
   saveButtonText: {
@@ -174,6 +178,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   goalsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  photosButton: {
+    backgroundColor: '#1D4576',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  photosButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
   },

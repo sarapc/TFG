@@ -73,3 +73,12 @@ CREATE TABLE rutalloc (
   idlloc INTEGER REFERENCES lloc(id) ON DELETE CASCADE,
   ordre INTEGER
 );
+
+-- imatges
+CREATE TABLE fotos (
+  id SERIAL PRIMARY KEY,
+  idusuari INTEGER REFERENCES usuari(id) ON DELETE CASCADE,
+  idlloc   INTEGER REFERENCES lloc(id)   ON DELETE CASCADE,
+  photourl TEXT    NOT NULL,
+  takenat  TIMESTAMP DEFAULT NOW()
+);

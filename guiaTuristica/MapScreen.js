@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
+import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import polyline from '@mapbox/polyline';
 import HomeButton from './HomeButton';
 
 const { width, height } = Dimensions.get('window');
+
+const BACKEND_URL = 'http://192.168.68.120:3000/api';
 
 const MapScreen = ({ route, navigation }) => {
   const places = route.params.places;
@@ -26,7 +30,7 @@ const MapScreen = ({ route, navigation }) => {
     const fetchLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        alert('Permís de localització denegat');
+        Alert.alert('Permís denegat', 'Permís de localització denegat');
         return;
       }
 
@@ -101,16 +105,65 @@ const MapScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleTakeSelfie = async (place) => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (permission.status !== 'granted') {
+      Alert.alert('Permís denegat', 'Permís per accedir a la càmera denegat.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const photo = result.assets[0];
+      console.log(`📸 Selfie feta a ${place.name}:`, photo.uri);
+
+      const formData = new FormData();
+      formData.append('photo', {
+        uri: photo.uri,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      });
+      formData.append('userID', userID.toString());
+      formData.append('placeID',   place.id.toString());
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/photos/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          Alert.alert('Foto guardada', 'La foto s\'ha desat correctament!');
+          console.log('Resposta servidor:', data);
+        } else {
+          Alert.alert('Error', 'Error desant la foto: ' + (data.error || ''));
+          console.error('Error backend:', data);
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Error en la petició: ' + error.message);
+        console.error('Error fetch:', error);
+      }
+    }
+  };
+
   const handleFinishRoute = () => {
     navigation.navigate('SaveRouteScreen', {
       places: places,
-      userID: userID
+      userID: userID,
     });
   };
 
   return (
     <View style={styles.container}>
-      <HomeButton userID= {userID} />
+      <HomeButton userID={userID} />
       <View style={styles.headerContainer}>
         <Text style={styles.header}>La teva ruta</Text>
       </View>
@@ -127,13 +180,19 @@ const MapScreen = ({ route, navigation }) => {
             {userLocation && (
               <Marker coordinate={userLocation} title="Estàs aquí" pinColor="blue" />
             )}
+
             {places.map((place, index) => (
               <Marker
                 key={index}
                 coordinate={{ latitude: place.latitude, longitude: place.longitude }}
                 title={place.name}
-              />
+                description="Toca per fer una foto"
+                onPress={() => handleTakeSelfie(place)}
+              >
+                <MaterialIcons name="photo-camera" size={30} color="#1D4576" />
+              </Marker>
             ))}
+
             {routeSegments.map((segment, index) => (
               <Polyline
                 key={index}

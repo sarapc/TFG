@@ -13,6 +13,8 @@ app.use('/api/cities', require('./routes/cities'));
 app.use('/api/places', require('./routes/places'));
 app.use('/api/rutes', require('./routes/routes'));
 app.use('/api/recomanacions', require('./routes/recomanacions'));
+app.use('/uploads', express.static('uploads'));
+app.use('/api/photos', require('./routes/photos'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log(`Servidor escoltant al port ${PORT}`));
